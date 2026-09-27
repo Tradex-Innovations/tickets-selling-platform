@@ -4,6 +4,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { defaultWizardDraft, initialCheckIns, initialEvents, initialOrders, initialSeats, initialTickets, makeSeats } from "@/data/mock-data";
 import { calculateOrderTotals, checkInTicket, issueTickets, recommendAdjacentSeats, sellSeats, transferTicket } from "@/lib/domain";
+import { isRoleAvailable } from "@/lib/demo-access";
 import type { CheckIn, DemoRole, EventRecord, Order, Seat, Ticket, ToastMessage, WizardDraft } from "@/types/domain";
 
 interface CheckoutInput {
@@ -77,6 +78,7 @@ const initialState = () => ({
 export const useDemoStore = create<DemoStore>()(persist((set, get) => ({
   ...initialState(),
   setRole: (role) => {
+    if (!isRoleAvailable(role)) return;
     set({ role });
     get().notify("Demo role changed", `You are now viewing Encore as ${role.replace("-", " ")}.`, "info");
   },
@@ -177,5 +179,9 @@ export const useDemoStore = create<DemoStore>()(persist((set, get) => ({
   resetDemo: () => set(initialState()),
 }), {
   name: "encore-demo-v1",
+  merge: (persisted, current) => {
+    const previous = persisted as Partial<DemoStore> | undefined;
+    return { ...current, ...previous, role: previous?.role && isRoleAvailable(previous.role) ? previous.role : "customer" };
+  },
   partialize: (state) => ({ role: state.role, events: state.events, seatsBySession: state.seatsBySession, orders: state.orders, tickets: state.tickets, checkIns: state.checkIns, selectedSessionId: state.selectedSessionId, selectedSeatIds: state.selectedSeatIds, holdExpiresAt: state.holdExpiresAt, promoCode: state.promoCode, lastOrderId: state.lastOrderId, favorites: state.favorites, wizardDraft: state.wizardDraft, sellerApproved: state.sellerApproved, commissionRate: state.commissionRate }),
 }));

@@ -1,5 +1,6 @@
 import type { CheckIn, DemoRole, Order, Seat, Session, Ticket } from "@/types/domain";
 import { formatNumber } from "@/lib/utils";
+import { isRoleAvailable, isRouteAvailable, ORGANIZER_PREVIEW_ONLY } from "@/lib/demo-access";
 
 export const PLATFORM_FEE_RATE = 0.05;
 export const PROCESSING_FEE_RATE = 0.025;
@@ -102,8 +103,9 @@ const routeRole: Record<string, DemoRole> = {
   "/admin": "admin",
 };
 
-export function canAccessRoute(role: DemoRole, pathname: string) {
-  const match = Object.entries(routeRole).find(([prefix]) => pathname.startsWith(prefix));
+export function canAccessRoute(role: DemoRole, pathname: string, previewOnly = ORGANIZER_PREVIEW_ONLY) {
+  if (!isRoleAvailable(role, previewOnly) || !isRouteAvailable(pathname, previewOnly)) return false;
+  const match = Object.entries(routeRole).find(([prefix]) => pathname === prefix || pathname.startsWith(`${prefix}/`));
   return !match || match[1] === role;
 }
 

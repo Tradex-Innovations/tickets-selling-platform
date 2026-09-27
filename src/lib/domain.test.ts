@@ -50,6 +50,12 @@ describe("ticketing domain", () => {
     expect(canAccessRoute("customer", "/seller/events")).toBe(false);
     expect(canAccessRoute("seller", "/seller/events")).toBe(true);
     expect(canAccessRoute("admin", "/explore")).toBe(true);
+    expect(canAccessRoute("seller", "/seller/events", true)).toBe(true);
+    expect(canAccessRoute("customer", "/account/tickets", true)).toBe(true);
+    expect(canAccessRoute("admin", "/admin", true)).toBe(false);
+    expect(canAccessRoute("seller", "/venue-manager/layouts", true)).toBe(false);
+    expect(canAccessRoute("box-office", "/", true)).toBe(false);
+    expect(canAccessRoute("admin", "/admin", false)).toBe(true);
   });
 
   it("detects overlapping bookings in the same hall", () => {

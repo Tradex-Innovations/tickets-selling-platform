@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { Button, Card } from "@/components/ui/primitives";
 import { canAccessRoute } from "@/lib/domain";
+import { isRoleAvailable, isRouteAvailable } from "@/lib/demo-access";
 import { normalizePathname } from "@/lib/pathname";
 import { cn, titleCase } from "@/lib/utils";
 import { useDemoStore } from "@/store/demo-store";
@@ -23,6 +24,7 @@ const roles: { id: DemoRole; label: string; route: string }[] = [
   { id: "check-in", label: "Check-in staff", route: "/check-in" },
   { id: "admin", label: "Platform admin", route: "/admin" },
 ];
+const visibleRoles = roles.filter((item) => isRoleAvailable(item.id));
 
 type NavItem = { label: string; href: string; icon: typeof LayoutDashboard };
 const nav: Record<Exclude<DemoRole, "customer">, NavItem[]> = {
@@ -71,8 +73,8 @@ export function RoleSwitcher() {
   const role = useDemoStore((state) => state.role);
   const setRole = useDemoStore((state) => state.setRole);
   const router = useRouter();
-  const selected = roles.find((item) => item.id === role)!;
-  return <div className="relative"><button onClick={() => setOpen(!open)} className="flex h-10 items-center gap-2 rounded-xl border border-[var(--line)] bg-white px-3 text-sm font-semibold text-[var(--ink)] shadow-sm transition hover:border-violet-300" disabled={!hydrated} aria-label="Switch demo role" aria-haspopup="listbox" aria-expanded={open}><span className="grid size-6 place-items-center rounded-lg bg-violet-50 text-[var(--brand)]"><CircleUserRound className="size-4" /></span><span className="hidden max-w-32 truncate sm:block">{selected.label}</span><ChevronDown className="size-4 text-slate-400" /></button>{open ? <><button className="fixed inset-0 z-40 cursor-default" onClick={() => setOpen(false)} aria-label="Close role menu" /><Card className="absolute right-0 top-12 z-50 w-64 overflow-hidden p-2 shadow-2xl" role="listbox"> <p className="px-3 py-2 text-[10px] font-extrabold uppercase tracking-[.16em] text-slate-400">Switch demo experience</p>{roles.map((item) => <button key={item.id} onClick={() => { setRole(item.id); setOpen(false); router.push(item.route); }} className={cn("flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm font-semibold transition", role === item.id ? "bg-violet-50 text-[var(--brand)]" : "text-slate-700 hover:bg-slate-50")} role="option" aria-selected={role === item.id}><span>{item.label}</span>{role === item.id ? <CheckCircle2 className="size-4" /> : null}</button>)}</Card></> : null}</div>;
+  const selected = visibleRoles.find((item) => item.id === role) ?? visibleRoles[0];
+  return <div className="relative"><button onClick={() => setOpen(!open)} className="flex h-10 items-center gap-2 rounded-xl border border-[var(--line)] bg-white px-3 text-sm font-semibold text-[var(--ink)] shadow-sm transition hover:border-violet-300" disabled={!hydrated} aria-label="Switch demo role" aria-haspopup="listbox" aria-expanded={open}><span className="grid size-6 place-items-center rounded-lg bg-violet-50 text-[var(--brand)]"><CircleUserRound className="size-4" /></span><span className="hidden max-w-32 truncate sm:block">{selected.label}</span><ChevronDown className="size-4 text-slate-400" /></button>{open ? <><button className="fixed inset-0 z-40 cursor-default" onClick={() => setOpen(false)} aria-label="Close role menu" /><Card className="absolute right-0 top-12 z-50 w-64 overflow-hidden p-2 shadow-2xl" role="listbox"> <p className="px-3 py-2 text-[10px] font-extrabold uppercase tracking-[.16em] text-slate-400">Switch demo experience</p>{visibleRoles.map((item) => <button key={item.id} onClick={() => { setRole(item.id); setOpen(false); router.push(item.route); }} className={cn("flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm font-semibold transition", role === item.id ? "bg-violet-50 text-[var(--brand)]" : "text-slate-700 hover:bg-slate-50")} role="option" aria-selected={role === item.id}><span>{item.label}</span>{role === item.id ? <CheckCircle2 className="size-4" /> : null}</button>)}</Card></> : null}</div>;
 }
 
 function PublicHeader() {
@@ -101,6 +103,7 @@ function AccessDenied({ pathname }: { pathname: string }) {
   const setRole = useDemoStore((state) => state.setRole);
   const router = useRouter();
   const expected = roles.find((item) => pathname.startsWith(item.route) && item.route !== "/") ?? roles[0];
+  if (!isRouteAvailable(pathname)) return <div className="grid min-h-screen place-items-center bg-[var(--surface)] p-5"><Card className="max-w-lg p-8 text-center"><div className="mx-auto grid size-14 place-items-center rounded-2xl bg-violet-50 text-[var(--brand)]"><ShieldCheck className="size-7" /></div><h1 className="mt-5 text-2xl font-bold text-[var(--ink)]">This workspace is not part of this preview</h1><p className="mt-3 leading-7 text-[var(--muted)]">This presentation includes the organizer workspace and the customer booking experience.</p><Link href="/demo" className="mt-6 inline-block"><Button>Explore the organizer preview</Button></Link><Link href="/" className="mt-4 block text-sm font-semibold text-[var(--brand)]">Return to marketplace</Link></Card></div>;
   return <div className="grid min-h-screen place-items-center bg-[var(--surface)] p-5"><Card className="max-w-lg p-8 text-center"><div className="mx-auto grid size-14 place-items-center rounded-2xl bg-red-50 text-red-600"><ShieldCheck className="size-7" /></div><h1 className="mt-5 text-2xl font-bold text-[var(--ink)]">This area is role-restricted</h1><p className="mt-3 leading-7 text-[var(--muted)]">The {titleCase(role)} demo cannot open this workspace. Switch to {expected.label} to continue the presentation.</p><Button className="mt-6" onClick={() => { setRole(expected.id); router.push(expected.route); }}>Switch to {expected.label}</Button><Link href="/" className="mt-4 block text-sm font-semibold text-[var(--brand)]">Return to marketplace</Link></Card></div>;
 }
 

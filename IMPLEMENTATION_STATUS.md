@@ -24,7 +24,8 @@ Updated: 27 September 2026
 - Dedicated mobile booking actions without overlapping navigation, larger SVG seat hit areas, safe-area spacing, and QR contrast preservation.
 - Management workspaces preserve the light desktop-oriented theme; role switching and stable Zustand selectors are regression-tested.
 - Playwright coverage for four responsive widths, discovery/filter behavior, same-route category navigation, purchase-to-check-in, repeat-scan warning, and all five operational role shells.
-- GitHub Pages static export configuration, 97 generated pages, repository-subpath asset support, trailing-slash routing, and a GitHub Actions build/deploy workflow.
+- GitHub Pages static export configuration, repository-subpath asset support, trailing-slash routing, and a GitHub Actions build/deploy workflow. The full local export generates 97 pages; the organizer-only Pages export generates 68.
+- Organizer-facing Pages profile limits the hosted role switcher and demo hub to Customer and Event organizer, omits internal portal routes from the static export, and replaces the seller wizard's venue-manager link with a simulated hall-layout request. Local development retains all six roles.
 
 ## Partially completed modules
 
@@ -41,7 +42,7 @@ Updated: 27 September 2026
 - Add true real-time collaboration and multi-device inventory updates.
 - Add automated accessibility audits and screenshot regression tests at mobile, tablet, and desktop breakpoints.
 - Localize Sinhala/Tamil content and add a production multi-currency/tax configuration model.
-- Verify the live GitHub Pages deployment and its main booking flow after the first push.
+- Verify the live GitHub Pages organizer preview and its booking flow after deployment.
 
 ## Known limitations
 
@@ -50,6 +51,7 @@ Updated: 27 September 2026
 - Generated QR marks are visual representations and are not cryptographically signed.
 - Browser automation currently targets Chrome/Chromium only.
 - GitHub Pages cannot share mutable demo state among visitors or generate arbitrary new URLs at runtime. The fixed wizard demo event is included in the static export.
+- The hosted organizer preview cannot approve newly submitted events; platform approval remains available only in the full local multi-role demo. Hosted customers can book seeded published events.
 - The default Next.js/Turbopack CSS build worker cannot bind a temporary local port in the restricted execution sandbox. The documented `next build --webpack` fallback is configured and passes.
 
 ## Verification results
@@ -65,7 +67,7 @@ Updated: 27 September 2026
 | Server-render error scan | Passed — no internal/application error markers |
 | Visual browser inspection | Passed — mobile marketplace and booking screens, desktop marketplace and admin |
 | Responsive coverage | Chrome at 360, 390, 768, and 1440 px; no page-level horizontal overflow on tested customer routes |
-| GitHub Pages export | Passed — 97 static pages generated under a repository subpath; direct route loads, assets, mobile navigation, and seller/admin transitions tested in Chrome |
-| GitHub publication | Repository configured at `Tradex-Innovations/tickets-selling-platform`; first push and live Pages verification pending |
+| GitHub Pages organizer export | Passed — 68 static pages generated under a repository subpath; organizer and customer roles only, hidden portal directories absent, direct admin URL 404, stale admin role sanitized, zero browser errors |
+| GitHub publication | Repository configured at `Tradex-Innovations/tickets-selling-platform`; live Pages verification pending |
 
 Primary routes smoke-tested: `/`, `/explore`, `/events/crescendo-colombo`, `/movies/serendib-skies`, `/booking/session-crescendo/seats`, `/checkout`, `/account/tickets`, `/seller`, `/seller/events/create`, `/seller/movies`, `/venue-manager/layouts/builder`, `/venue-manager/calendar`, `/box-office`, `/check-in`, `/admin`, `/admin/events`, `/demo`, and `/help`.

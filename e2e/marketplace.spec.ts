@@ -33,6 +33,7 @@ for (const width of [360, 390, 768, 1440]) {
 test("mobile discovery filters, favorites, and keyboard-accessible filter sheet", async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/explore", { waitUntil: "domcontentloaded" });
+  await expect(page.getByRole("button", { name: "Switch demo role" })).toBeEnabled();
   await page.getByRole("navigation", { name: "Event categories" }).getByRole("button", { name: "Movies" }).click();
   await expect(page.locator(".event-card")).toHaveCount(1);
   await page.getByRole("button", { name: "Save Serendib Skies", exact: true }).click();
@@ -56,6 +57,7 @@ test("mobile customer purchase issues tickets that check-in staff can validate o
   const errors: string[] = [];
   page.on("pageerror", (error) => errors.push(error.message));
   await page.goto("/events/crescendo-colombo", { waitUntil: "domcontentloaded" });
+  await expect(page.getByRole("button", { name: "Switch demo role" })).toBeEnabled();
   await page.locator(".market-sticky-action").getByRole("button", { name: "Choose seats" }).click();
   await page.getByRole("button", { name: "Find best seats" }).click();
   await page.getByRole("button", { name: "Recommend adjacent seats" }).click();

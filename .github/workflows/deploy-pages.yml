@@ -40,6 +40,14 @@ jobs:
         run: npm run build
         env:
           GITHUB_PAGES: "true"
+          NEXT_PUBLIC_ORGANIZER_PREVIEW: "true"
+      - name: Verify organizer-only export
+        run: |
+          test -f out/seller/index.html
+          test -f out/account/index.html
+          for route in admin venue-manager box-office check-in; do
+            test ! -e "out/$route"
+          done
       - name: Preserve Next.js assets on Pages
         run: touch out/.nojekyll
       - uses: actions/configure-pages@v5
