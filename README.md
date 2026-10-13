@@ -63,6 +63,12 @@ The hosted site is an **interactive prototype**: payment and identity steps are 
 
 ## Demo access
 
+### Customer sign-in preview
+
+Open `/login` (also available at `/signup` and `/register`) for a single, responsive **Sign in or sign up** screen with Google, Facebook, and Apple buttons. Choosing a provider opens the seeded customer demo account; the header changes to **Account**, the session survives refreshes, and **Sign out** returns to the guest view. Account links return to the requested section after sign-in. Browsing and checkout remain available to guests.
+
+This is a frontend presentation flow. It does not contact a social provider, create a real account, or enforce server authentication. No authentication service or credentials are required. **Reset Demo Data** also clears this preview session.
+
 No password is required. The hosted preview offers the first two roles below. Local development offers all six through the role switcher:
 
 | Role | Demo identity | Default route |

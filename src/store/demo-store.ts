@@ -5,6 +5,7 @@ import { persist } from "zustand/middleware";
 import { defaultWizardDraft, initialCheckIns, initialEvents, initialOrders, initialSeats, initialTickets, makeSeats } from "@/data/mock-data";
 import { calculateOrderTotals, checkInTicket, issueTickets, recommendAdjacentSeats, sellSeats, transferTicket } from "@/lib/domain";
 import { isRoleAvailable } from "@/lib/demo-access";
+import type { SocialProvider } from "@/lib/demo-auth";
 import type { CheckIn, DemoRole, EventRecord, Order, Seat, Ticket, ToastMessage, WizardDraft } from "@/types/domain";
 
 interface CheckoutInput {
@@ -17,6 +18,7 @@ interface CheckoutInput {
 
 interface DemoStore {
   role: DemoRole;
+  demoSession?: { provider: SocialProvider };
   events: EventRecord[];
   seatsBySession: Record<string, Seat[]>;
   orders: Order[];
@@ -33,6 +35,8 @@ interface DemoStore {
   commissionRate: number;
   toasts: ToastMessage[];
   setRole: (role: DemoRole) => void;
+  signInDemo: (provider: SocialProvider) => void;
+  signOutDemo: () => void;
   setSession: (sessionId: string) => void;
   toggleSeat: (sessionId: string, seatId: string) => void;
   recommendSeats: (sessionId: string, count: number, budget: number, section: string, accessibility: boolean) => Seat[];
@@ -58,6 +62,7 @@ interface DemoStore {
 
 const initialState = () => ({
   role: "customer" as DemoRole,
+  demoSession: undefined as DemoStore["demoSession"],
   events: initialEvents,
   seatsBySession: initialSeats,
   orders: initialOrders,
@@ -77,6 +82,8 @@ const initialState = () => ({
 
 export const useDemoStore = create<DemoStore>()(persist((set, get) => ({
   ...initialState(),
+  signInDemo: (provider) => set({ demoSession: { provider }, role: "customer" }),
+  signOutDemo: () => set({ demoSession: undefined }),
   setRole: (role) => {
     if (!isRoleAvailable(role)) return;
     set({ role });
@@ -183,5 +190,5 @@ export const useDemoStore = create<DemoStore>()(persist((set, get) => ({
     const previous = persisted as Partial<DemoStore> | undefined;
     return { ...current, ...previous, role: previous?.role && isRoleAvailable(previous.role) ? previous.role : "customer" };
   },
-  partialize: (state) => ({ role: state.role, events: state.events, seatsBySession: state.seatsBySession, orders: state.orders, tickets: state.tickets, checkIns: state.checkIns, selectedSessionId: state.selectedSessionId, selectedSeatIds: state.selectedSeatIds, holdExpiresAt: state.holdExpiresAt, promoCode: state.promoCode, lastOrderId: state.lastOrderId, favorites: state.favorites, wizardDraft: state.wizardDraft, sellerApproved: state.sellerApproved, commissionRate: state.commissionRate }),
+  partialize: (state) => ({ role: state.role, demoSession: state.demoSession, events: state.events, seatsBySession: state.seatsBySession, orders: state.orders, tickets: state.tickets, checkIns: state.checkIns, selectedSessionId: state.selectedSessionId, selectedSeatIds: state.selectedSeatIds, holdExpiresAt: state.holdExpiresAt, promoCode: state.promoCode, lastOrderId: state.lastOrderId, favorites: state.favorites, wizardDraft: state.wizardDraft, sellerApproved: state.sellerApproved, commissionRate: state.commissionRate }),
 }));

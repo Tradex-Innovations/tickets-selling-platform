@@ -3,12 +3,14 @@ import { PrototypeRouter } from "@/components/prototype-router";
 import { PageSkeleton } from "@/components/shared/page-skeleton";
 import { initialEvents, venues } from "@/data/mock-data";
 import { ORGANIZER_PREVIEW_ONLY } from "@/lib/demo-access";
+import { AUTH_PATHS } from "@/lib/demo-auth";
 
 // GitHub Pages needs each directly loadable route emitted as a static file.
 // The wizard uses a stable demo ID so its event and booking routes can exist
 // before an organizer submits it in local storage.
 export function generateStaticParams() {
   const routes = [
+    ...AUTH_PATHS.map((path) => path.slice(1)),
     "explore", "checkout", "payment/result", "help", "legal/terms", "legal/refunds", "demo",
     "account", ...["tickets", "orders", "saved", "notifications", "profile", "refunds"].map((section) => `account/${section}`),
     "seller", ...["events", "events/create", "events/colombo-afterglow", "onboarding", "movies", "orders", "attendees", "inventory", "promotions", "communications", "reports", "payouts", "team", "settings"].map((section) => `seller/${section}`),

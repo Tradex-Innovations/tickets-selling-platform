@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Compass } from "lucide-react";
 import { AccountScreen } from "@/screens/account/account-screen";
+import { AuthScreen } from "@/screens/account/auth-screen";
 import { AdminDashboardScreen, AdminEventsScreen, AdminSellersScreen, AdminSettingsScreen } from "@/screens/admin/admin-screen";
 import { CheckoutScreen } from "@/screens/booking/checkout-screen";
 import { PaymentResultScreen } from "@/screens/booking/payment-result-screen";
@@ -22,10 +23,12 @@ import { GenericPortalScreen } from "@/screens/portals/generic-portal-screen";
 import { LayoutBuilderScreen, LayoutsScreen, VenueCalendarScreen, VenueDashboardScreen } from "@/screens/venue/venue-screen";
 import { Button, Card } from "@/components/ui/primitives";
 import { normalizePathname } from "@/lib/pathname";
+import { isAuthPath } from "@/lib/demo-auth";
 
 export function PrototypeRouter() {
   const pathname = normalizePathname(usePathname());
   const parts = pathname.split("/").filter(Boolean);
+  if (isAuthPath(pathname)) return <AuthScreen />;
   if (pathname === "/") return <HomeScreen />;
   if (pathname === "/explore") return <ExploreScreen />;
   if (parts[0] === "events" && parts[1]) return <EventDetailsScreen eventId={parts[1]} />;

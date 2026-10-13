@@ -12,6 +12,7 @@ import { Button, Card } from "@/components/ui/primitives";
 import { canAccessRoute } from "@/lib/domain";
 import { isRoleAvailable, isRouteAvailable } from "@/lib/demo-access";
 import { normalizePathname } from "@/lib/pathname";
+import { isAuthPath } from "@/lib/demo-auth";
 import { cn, titleCase } from "@/lib/utils";
 import { useDemoStore } from "@/store/demo-store";
 import type { DemoRole } from "@/types/domain";
@@ -74,11 +75,13 @@ export function RoleSwitcher() {
   const setRole = useDemoStore((state) => state.setRole);
   const router = useRouter();
   const selected = visibleRoles.find((item) => item.id === role) ?? visibleRoles[0];
-  return <div className="relative"><button onClick={() => setOpen(!open)} className="flex h-10 items-center gap-2 rounded-xl border border-[var(--line)] bg-white px-3 text-sm font-semibold text-[var(--ink)] shadow-sm transition hover:border-violet-300" disabled={!hydrated} aria-label="Switch demo role" aria-haspopup="listbox" aria-expanded={open}><span className="grid size-6 place-items-center rounded-lg bg-violet-50 text-[var(--brand)]"><CircleUserRound className="size-4" /></span><span className="hidden max-w-32 truncate sm:block">{selected.label}</span><ChevronDown className="size-4 text-slate-400" /></button>{open ? <><button className="fixed inset-0 z-40 cursor-default" onClick={() => setOpen(false)} aria-label="Close role menu" /><Card className="absolute right-0 top-12 z-50 w-64 overflow-hidden p-2 shadow-2xl" role="listbox"> <p className="px-3 py-2 text-[10px] font-extrabold uppercase tracking-[.16em] text-slate-400">Switch demo experience</p>{visibleRoles.map((item) => <button key={item.id} onClick={() => { setRole(item.id); setOpen(false); router.push(item.route); }} className={cn("flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm font-semibold transition", role === item.id ? "bg-violet-50 text-[var(--brand)]" : "text-slate-700 hover:bg-slate-50")} role="option" aria-selected={role === item.id}><span>{item.label}</span>{role === item.id ? <CheckCircle2 className="size-4" /> : null}</button>)}</Card></> : null}</div>;
+  return <div className="demo-role-switcher relative"><button onClick={() => setOpen(!open)} className="flex h-10 items-center gap-2 rounded-xl border border-[var(--line)] bg-white px-3 text-sm font-semibold text-[var(--ink)] shadow-sm transition hover:border-violet-300" disabled={!hydrated} aria-label="Switch demo role" aria-haspopup="listbox" aria-expanded={open}><span className="grid size-6 place-items-center rounded-lg bg-violet-50 text-[var(--brand)]"><CircleUserRound className="size-4" /></span><span className="hidden max-w-32 truncate sm:block">{selected.label}</span><ChevronDown className="size-4 text-slate-400" /></button>{open ? <><button className="fixed inset-0 z-40 cursor-default" onClick={() => setOpen(false)} aria-label="Close role menu" /><Card className="absolute right-0 top-12 z-50 w-64 overflow-hidden p-2 shadow-2xl" role="listbox"> <p className="px-3 py-2 text-[10px] font-extrabold uppercase tracking-[.16em] text-slate-400">Switch demo experience</p>{visibleRoles.map((item) => <button key={item.id} onClick={() => { setRole(item.id); setOpen(false); router.push(item.route); }} className={cn("flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left text-sm font-semibold transition", role === item.id ? "bg-violet-50 text-[var(--brand)]" : "text-slate-700 hover:bg-slate-50")} role="option" aria-selected={role === item.id}><span>{item.label}</span>{role === item.id ? <CheckCircle2 className="size-4" /> : null}</button>)}</Card></> : null}</div>;
 }
 
 function PublicHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const hydrated = useSyncExternalStore(subscribeToHydration, () => true, () => false);
+  const demoSession = useDemoStore((state) => state.demoSession);
   const pathname = normalizePathname(usePathname());
   const isHome = pathname === "/";
   const sessionId = useDemoStore((state) => state.selectedSessionId);
@@ -86,7 +89,7 @@ function PublicHeader() {
   return <header className="market-header"><div className="page-container market-header__inner">
     <div className="flex items-center gap-3">{!isHome ? <Link href={backHref} className="market-icon-button lg:hidden" aria-label="Back to discovery"><ArrowLeft className="size-5" /></Link> : null}<Link href="/" className="market-wordmark"><span className="market-logo-icon"><Ticket className="size-6 -rotate-12" /></span>encore<span className="text-violet-400">.</span></Link></div>
     <nav className="market-desktop-nav" aria-label="Primary navigation">{[{ name: "Discover", href: "/" }, { name: "Explore events", href: "/explore" }, { name: "Movies", href: "/explore?category=Movies" }, { name: "My tickets", href: "/account/tickets" }].map((item) => <Link key={item.name} href={item.href} aria-current={pathname === item.href ? "page" : undefined}>{item.name}</Link>)}</nav>
-    <div className="flex items-center gap-2"><Link href="/demo" className="market-partner-link">For organizers <ChevronDown className="size-3.5" /></Link><RoleSwitcher /><button className="market-icon-button lg:hidden" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle menu" aria-expanded={menuOpen}>{menuOpen ? <X className="size-5" /> : <Menu className="size-5" />}</button></div>
+    <div className="flex items-center gap-2"><Link href="/demo" className="market-partner-link">For organizers <ChevronDown className="size-3.5" /></Link><RoleSwitcher /><Link href={hydrated && demoSession ? "/account" : "/login"} className="market-sign-in" aria-label={hydrated && demoSession ? "My account" : undefined}>{hydrated && demoSession ? <><CircleUserRound className="size-4" /><span>Account</span></> : "Sign in"}</Link><button className="market-icon-button lg:hidden" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle menu" aria-expanded={menuOpen}>{menuOpen ? <X className="size-5" /> : <Menu className="size-5" />}</button></div>
     </div>{menuOpen ? <nav className="market-menu" aria-label="More navigation">{[{ name: "Explore events", href: "/explore" }, { name: "My account", href: "/account" }, { name: "Venues", href: "/venues/nelum-pokuna" }, { name: "Help & FAQ", href: "/help" }, { name: "Partner workspaces", href: "/demo" }].map((item) => <Link key={item.href} href={item.href} onClick={() => setMenuOpen(false)}>{item.name}<ArrowLeft className="size-4 rotate-180" /></Link>)}</nav> : null}</header>;
 }
 
@@ -110,6 +113,7 @@ function AccessDenied({ pathname }: { pathname: string }) {
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = normalizePathname(usePathname());
   const role = useDemoStore((state) => state.role);
+  if (isAuthPath(pathname)) return <div className="marketplace">{children}</div>;
   if (!canAccessRoute(role, pathname)) return <AccessDenied pathname={pathname} />;
   if (role !== "customer" && pathname.startsWith(`/${role}`)) return <PortalShell role={role}>{children}</PortalShell>;
   const focusedBooking = ["/events/", "/movies/", "/booking/", "/checkout", "/payment/"].some((prefix) => pathname.startsWith(prefix));
